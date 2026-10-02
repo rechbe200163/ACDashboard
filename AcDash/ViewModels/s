@@ -1,0 +1,10 @@
+import Foundation
+import AcBridgeKit
+
+final class s: TelemetryViewModel {
+    private var segements: MiniSectorData? { frame?.miniSectors }
+
+    var segementCount: Int { frame?.miniSectors.count ?? 45 }
+    var currentLapText: String { Self.formatLap(Int((segements?.liveDeltaMs)!)) }
+    var currentSegments: [SectorResult] {segements?.results ?? []}
+}
