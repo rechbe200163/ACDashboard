@@ -33,33 +33,9 @@
 		CE011465306FD5BD001435DF /* AcDashUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AcDashUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		CE2782D13072821A00317B3E /* Exceptions for "AcDash" folder in "AcDash" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				ViewModels/s,
-			);
-			target = CE01144B306FD5BC001435DF /* AcDash */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
-/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
-		CE2782D23072821A00317B3E /* Exceptions for "AcDash" folder in "Compile Sources" phase from "AcDash" target */ = {
-			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
-			buildPhase = CE011448306FD5BC001435DF /* Sources */;
-			membershipExceptions = (
-				ViewModels/s,
-			);
-		};
-/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		CE01144E306FD5BC001435DF /* AcDash */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				CE2782D13072821A00317B3E /* Exceptions for "AcDash" folder in "AcDash" target */,
-				CE2782D23072821A00317B3E /* Exceptions for "AcDash" folder in "Compile Sources" phase from "AcDash" target */,
-			);
 			path = AcDash;
 			sourceTree = "<group>";
 		};
