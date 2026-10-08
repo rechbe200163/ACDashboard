@@ -9,6 +9,15 @@ import Foundation
 
 public struct Wheels: Decodable, Sendable {
     public let fl, fr, rl, rr: Double
+
+    public init(fl: Double, fr: Double, rl: Double, rr: Double) {
+        self.fl = fl; self.fr = fr; self.rl = rl; self.rr = rr
+    }
+
+    /// Alle vier gleich, praktisch für Previews: Wheels(all: 80)
+    public init(all value: Double) {
+        self.init(fl: value, fr: value, rl: value, rr: value)
+    }
 }
 
 public struct GForce: Decodable, Sendable {
@@ -19,6 +28,19 @@ public struct TyreData: Decodable, Sendable {
     public let coreTemp, innerTemp, middleTemp, outerTemp: Wheels
     public let pressure, wear, slip, load: Wheels
     public let compound: String
+    /// Index in session.carPhysics.tyreCompounds (nil = unbekannt)
+    public let compoundIndex: Int?
+
+    public init(coreTemp: Wheels, innerTemp: Wheels, middleTemp: Wheels, outerTemp: Wheels,
+                pressure: Wheels, wear: Wheels, slip: Wheels, load: Wheels, compound: String,
+                compoundIndex: Int? = nil) {
+        self.coreTemp = coreTemp; self.innerTemp = innerTemp
+        self.middleTemp = middleTemp; self.outerTemp = outerTemp
+        self.pressure = pressure; self.wear = wear
+        self.slip = slip; self.load = load
+        self.compound = compound
+        self.compoundIndex = compoundIndex
+    }
 }
 
 public struct LapData: Decodable, Sendable {
@@ -69,6 +91,7 @@ public struct TelemetryFrame: Decodable, Sendable {
     public let surfaceGrip: Double
     public let carDamage: [Double]
     public let miniSectors: MiniSectorData
+    public let sectors: SectorData
 
     /// Computed Property = wie ein Getter in TS: get gearLabel() { ... }
     public var gearLabel: String {
@@ -104,13 +127,27 @@ public struct MiniSectorData: Decodable, Sendable {
     public let current: Int                    // Index des Minisektors, in dem das Auto gerade ist
     public let results: [SectorResult]         // aktuelle Runde
     public let lastLapResults: [SectorResult]  // komplette letzte Runde (leer, wenn keine)
-    public let referenceLapMs: Int?            // beste gültige Runde dieser Session (Vergleich für die Minisektoren)
     public let lapValid: Bool
     public let mode: String?                   // "solo" | "field" (optional, ältere Bridges schicken es nicht)
     public let fieldCars: Int?                 // Anzahl anderer Autos auf der Strecke
 
     /// true = andere Autos fahren → F1-Logik (lila = Feld-Bestwert, grün = eigener Bestwert)
     public var isFieldMode: Bool { mode == "field" }
+}
+
+/// Echte AC-Sektoren (meist 3), alle Zeiten in ms. Array-Index = Sektor (0 = S1).
+/// nil in einem Array = (noch) kein Wert. Die Bestzeit der Runde steht in lap.bestLapMs.
+public struct SectorData: Decodable, Sendable {
+    public let count: Int
+    public let current: Int                    // aktueller Sektor (0-basiert)
+    public let currentRunningMs: Int?          // läuft gerade im aktuellen Sektor (nil = Sektorstart nicht gesehen)
+    public let currentLap: [Int?]              // fertige Sektoren der laufenden Runde
+    public let currentResults: [SectorResult]
+    public let lastLap: [Int?]                 // komplette letzte Runde (leer, wenn es noch keine gibt)
+    public let lastLapResults: [SectorResult]
+    public let best: [Int?]                    // beste Zeit je Sektor in dieser Session (nur gültige Runden)
+    public let bestLap: [Int?]                 // Sektoren der besten Runde
+    public let theoreticalBestMs: Int?         // Summe der besten Sektoren
 }
 
 public struct SessionInfo: Decodable, Sendable {
@@ -135,6 +172,51 @@ public struct SessionInfo: Decodable, Sendable {
     public let fuelRate: Double
     public let tyreRate: Double
     public let damageRate: Double
+    /// Temperaturfenster aus den Autodateien (nil, wenn die Bridge sie nicht lesen konnte)
+    public let carPhysics: CarPhysics?
+}
+
+// MARK: - Autodaten (aus data.acd)
+
+/// Temperaturfenster aus AC's Performance-Kurve, alles in °C.
+/// optimal = ≥ 99,5 % vom maximalen Grip, ok = ≥ 98 %
+public struct TempWindow: Decodable, Sendable {
+    public let peakC: Int
+    public let optimalMinC, optimalMaxC: Int
+    public let okMinC, okMaxC: Int
+
+    public init(peakC: Int, optimalMinC: Int, optimalMaxC: Int, okMinC: Int, okMaxC: Int) {
+        self.peakC = peakC
+        self.optimalMinC = optimalMinC; self.optimalMaxC = optimalMaxC
+        self.okMinC = okMinC; self.okMaxC = okMaxC
+    }
+}
+
+public struct TyreCompoundInfo: Decodable, Sendable {
+    public let index: Int
+    public let name: String
+    public let shortName: String
+    public let front: TempWindow?
+    public let rear: TempWindow?
+    public let idealPressureFront: Double?   // psi
+    public let idealPressureRear: Double?
+}
+
+/// nil pro Achse = Auto hat dort kein Bremstemperatur-Modell
+public struct BrakeWindows: Decodable, Sendable {
+    public let front: TempWindow?
+    public let rear: TempWindow?
+}
+
+public struct CarPhysics: Decodable, Sendable {
+    public let tyreCompounds: [TyreCompoundInfo]
+    public let brakes: BrakeWindows?
+
+    /// Sicherer Zugriff über den Index aus frame.tyres.compoundIndex
+    public func compound(at index: Int?) -> TyreCompoundInfo? {
+        guard let index, tyreCompounds.indices.contains(index) else { return nil }
+        return tyreCompounds[index]
+    }
 }
 
 public struct BridgeStatus: Decodable, Sendable {

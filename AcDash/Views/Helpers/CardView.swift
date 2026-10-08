@@ -7,15 +7,27 @@
 
 import SwiftUI
 
-struct CardView<Content:View>: View {
+struct CardView<Content: View>: View {
+    let title: String?
     @ViewBuilder let content: Content
+
+    init(title: String? = nil, @ViewBuilder content: () -> Content) {
+        self.title = title
+        self.content = content()
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 10) {
+            if let title {
+                Text(title)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
             content
         }
         .padding()
-        .frame(alignment: .leading)
-        .background(.quaternary, in: RoundedRectangle(cornerRadius: 12))
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading) // ZUERST groß machen
+        .background(.gray.opacity(0.15), in: .rect(cornerRadius: 16))            // DANN anmalen
     }
 }
 

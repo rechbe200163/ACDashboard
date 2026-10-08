@@ -14,9 +14,15 @@ struct AcDashApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootView()                      // statt ContentView()
+            RootView()
                 .environment(client)
                 .task { client.connect() }
+                .onAppear {
+                    UIApplication.shared.isIdleTimerDisabled = true
+                }
+                .onDisappear {
+                    UIApplication.shared.isIdleTimerDisabled = false
+                }
         }
     }
 }
