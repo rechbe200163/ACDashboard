@@ -141,10 +141,13 @@ public struct SectorData: Decodable, Sendable {
     public let count: Int
     public let current: Int                    // aktueller Sektor (0-basiert)
     public let currentRunningMs: Int?          // läuft gerade im aktuellen Sektor (nil = Sektorstart nicht gesehen)
+    
     public let currentLap: [Int?]              // fertige Sektoren der laufenden Runde
-    public let currentResults: [SectorResult]
+    public let currentResults: [SectorResult]  // färbung .purple, .yellow, .green
+    
     public let lastLap: [Int?]                 // komplette letzte Runde (leer, wenn es noch keine gibt)
-    public let lastLapResults: [SectorResult]
+    public let lastLapResults: [SectorResult]  // färbung .purple, .yellow, .green
+    
     public let best: [Int?]                    // beste Zeit je Sektor in dieser Session (nur gültige Runden)
     public let bestLap: [Int?]                 // Sektoren der besten Runde
     public let theoreticalBestMs: Int?         // Summe der besten Sektoren

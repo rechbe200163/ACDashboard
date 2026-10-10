@@ -32,21 +32,7 @@ struct LiveView: View {
                         }
                     }
 
-                    CardView {
-                        HStack(spacing: 20) {
-                            ValueTile(label: "km/h", value: vm.speedText)
-                            ValueTile(label: "Gang", value: vm.gearText)
-                            ValueTile(label: "RPM",  value: vm.rpmText)
-                        }
-                    }
-
-                    CardView {
-                        VStack(alignment: .leading, spacing: 8) {
-                            ProgressView(value: vm.rpmFraction).tint(.orange)
-                            ProgressView(value: vm.throttle).tint(.green)
-                            ProgressView(value: vm.brake).tint(.red)
-                        }
-                    }
+                    SectorsView(currentLapSectorDeltas: vm.currentLapSectorDeltas)
 
                     CardView {
                         Text(vm.bestLapText)
