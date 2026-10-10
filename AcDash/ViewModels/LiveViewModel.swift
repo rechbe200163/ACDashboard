@@ -4,7 +4,7 @@ import AcBridgeKit
 final class LiveViewModel: TelemetryViewModel {
     private var lap: LapData? { frame?.lap }
     private var segments: MiniSectorData? { frame?.miniSectors }
-    private var sectore: SectorData? {frame?.sectors}
+    private var sector: SectorData? {frame?.sectors}
 
     var sessionTitle: String? { session.map { "\($0.car) · \($0.track)" } }
 
@@ -36,6 +36,15 @@ final class LiveViewModel: TelemetryViewModel {
     var liveDeltaText: String { Self.formatLap(lap?.acDeltaMs)}
     var liveDelta: Int { lap?.acDeltaMs ?? 0}
     var currentSegments: [SectorResult] {segments?.results ?? []}
+    
+    /// Delta pro Sektor zur besten Runde, z. B. ["-0.231", "+0.104", "–"]
+    var currentLapSectorDeltas: [String] {
+        guard let sector else { return [] }
+        return zip(sector.currentLap, sector.bestLap).map { current, best in
+            guard let current, let best else { return "–-.---" }      // Sektor noch nicht gefahren oder kein Vergleich
+            return String(format: "%+.3f", Double(current - best) / 1000)
+        }
+    }
     
     var predictedLapText: String {
         guard let best = frame?.lap.bestLapMs,
